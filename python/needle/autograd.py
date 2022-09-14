@@ -1,7 +1,7 @@
 """Core data structures."""
 import needle
 from typing import List, Optional, NamedTuple, Tuple, Union
-from collections import namedtuple
+from collections import deque, namedtuple
 import numpy
 
 # needle version
@@ -11,6 +11,7 @@ TENSOR_COUNTER = 0
 # NOTE: we will import numpy as the array_api
 # as the backend for our computations, this line will change in later homeworks
 import numpy as array_api
+
 NDArray = numpy.ndarray
 
 
@@ -33,9 +34,11 @@ class CPUDevice(Device):
     def enabled(self):
         return True
 
+
 def cpu():
     """Return cpu device"""
     return CPUDevice()
+
 
 def all_devices():
     """return a list of all available devices"""
@@ -64,9 +67,8 @@ class Op:
         """
         raise NotImplementedError()
 
-    def gradient(
-        self, out_grad: "Value", node: "Value"
-    ) -> Union["Value", Tuple["Value"]]:
+    def gradient(self, out_grad: "Value",
+                 node: "Value") -> Union["Value", Tuple["Value"]]:
         """Compute partial adjoint for each input value for a given output adjoint.
 
         Parameters
@@ -85,7 +87,8 @@ class Op:
         """
         raise NotImplementedError()
 
-    def gradient_as_tuple(self, out_grad: "Value", node: "Value") -> Tuple["Value"]:
+    def gradient_as_tuple(self, out_grad: "Value",
+                          node: "Value") -> Tuple["Value"]:
         """ Convenience method to always return a tuple from gradient call"""
         output = self.gradient(out_grad, node)
         if isinstance(output, tuple):
@@ -93,7 +96,7 @@ class Op:
         elif isinstance(output, list):
             return tuple(output)
         else:
-            return (output,)
+            return (output, )
 
 
 class TensorOp(Op):
@@ -128,8 +131,7 @@ class Value:
             return self.cached_data
         # note: data implicitly calls realized cached data
         self.cached_data = self.op.compute(
-            *[x.realize_cached_data() for x in self.inputs]
-        )
+            *[x.realize_cached_data() for x in self.inputs])
         self.cached_data
         return self.cached_data
 
@@ -140,15 +142,13 @@ class Value:
         global TENSOR_COUNTER
         TENSOR_COUNTER -= 1
 
-    def _init(
-        self,
-        op: Optional[Op],
-        inputs: List["Tensor"],
-        *,
-        num_outputs: int = 1,
-        cached_data: List[object] = None,
-        requires_grad: Optional[bool] = None
-    ):
+    def _init(self,
+              op: Optional[Op],
+              inputs: List["Tensor"],
+              *,
+              num_outputs: int = 1,
+              cached_data: List[object] = None,
+              requires_grad: Optional[bool] = None):
         global TENSOR_COUNTER
         TENSOR_COUNTER += 1
         if requires_grad is None:
@@ -208,7 +208,8 @@ class TensorTuple(Value):
     def __add__(self, other):
         assert isinstance(other, TensorTuple)
         assert len(self) == len(other)
-        return needle.ops.make_tuple(*[self[i] + other[i] for i in range(len(self))])
+        return needle.ops.make_tuple(
+            *[self[i] + other[i] for i in range(len(self))])
 
     def detach(self):
         """Create a new tensor that shares the data but detaches from the graph."""
@@ -218,15 +219,13 @@ class TensorTuple(Value):
 class Tensor(Value):
     grad: "Tensor"
 
-    def __init__(
-        self,
-        array,
-        *,
-        device: Optional[Device] = None,
-        dtype=None,
-        requires_grad=True,
-        **kwargs
-    ):
+    def __init__(self,
+                 array,
+                 *,
+                 device: Optional[Device] = None,
+                 dtype=None,
+                 requires_grad=True,
+                 **kwargs):
         if isinstance(array, Tensor):
             if device is None:
                 device = array.device
@@ -236,12 +235,14 @@ class Tensor(Value):
                 cached_data = array.realize_cached_data()
             else:
                 # fall back, copy through numpy conversion
-                cached_data = Tensor._array_from_numpy(
-                    array.numpy(), device=device, dtype=dtype
-                )
+                cached_data = Tensor._array_from_numpy(array.numpy(),
+                                                       device=device,
+                                                       dtype=dtype)
         else:
             device = device if device else cpu()
-            cached_data = Tensor._array_from_numpy(array, device=device, dtype=dtype)
+            cached_data = Tensor._array_from_numpy(array,
+                                                   device=device,
+                                                   dtype=dtype)
 
         self._init(
             None,
@@ -271,8 +272,7 @@ class Tensor(Value):
             None,
             [],
             cached_data=data
-            if not isinstance(data, Tensor)
-            else data.realize_cached_data(),
+            if not isinstance(data, Tensor) else data.realize_cached_data(),
             requires_grad=requires_grad,
         )
         return tensor
@@ -412,14 +412,21 @@ def find_topo_sort(node_list: List[Value]) -> List[Value]:
     sort.
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    topo = []
+    visited = set()
+    topo_sort_dfs(node_list[0], visited, topo)
+    return topo
     ### END YOUR SOLUTION
 
 
 def topo_sort_dfs(node, visited, topo_order):
     """Post-order DFS"""
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    for next in node.inputs:
+        topo_sort_dfs(next, visited, topo_order)
+    if node not in visited:
+        visited.add(node)
+        topo_order.append(node)
     ### END YOUR SOLUTION
 
 
