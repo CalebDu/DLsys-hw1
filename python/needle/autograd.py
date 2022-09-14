@@ -408,6 +408,7 @@ def compute_gradient_of_variables(output_tensor, out_grad):
         if node.op is None:
             continue
         v_ki_list = node.op.gradient(v_i, node)
+        print(node.op)
         for ipt, v_ki in zip(node.inputs, v_ki_list):
             node_to_output_grads_list.setdefault(ipt, list())
             node_to_output_grads_list[ipt].append(v_ki)

@@ -35,7 +35,7 @@ class AddScalar(TensorOp):
         return a + self.scalar
 
     def gradient(self, out_grad: Tensor, node: Tensor):
-        return out_grad
+        return [out_grad]
 
 
 def add_scalar(a, scalar):
