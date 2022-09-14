@@ -3,6 +3,7 @@ import gzip
 import numpy as np
 
 import sys
+
 sys.path.append('python/')
 import needle as ndl
 
@@ -30,7 +31,18 @@ def parse_mnist(image_filesname, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    with gzip.open(image_filesname) as file:
+        magic, num, rows, cols = struct.unpack(">IIII", file.read(16))
+        images = np.fromstring(file.read(), dtype=np.uint8).reshape(-1, 784)
+
+    with gzip.open(label_filename) as file:
+        magic, n = struct.unpack(">II", file.read(8))
+        labels = np.fromstring(file.read(), dtype=np.uint8)
+
+    # normalize
+    images = np.float32(images) / 255.
+
+    return [images, labels]
     ### END YOUR SOLUTION
 
 
@@ -55,7 +67,7 @@ def softmax_loss(Z, y_one_hot):
     ### END YOUR SOLUTION
 
 
-def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
+def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
     """ Run a single epoch of SGD for a two-layer neural network defined by the
     weights W1 and W2 (with no bias terms):
         logits = ReLU(X * W1) * W1
@@ -86,9 +98,10 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
 
 ### CODE BELOW IS FOR ILLUSTRATION, YOU DO NOT NEED TO EDIT
 
-def loss_err(h,y):
+
+def loss_err(h, y):
     """ Helper function to compute both loss and error"""
     y_one_hot = np.zeros((y.shape[0], h.shape[-1]))
     y_one_hot[np.arange(y.size), y] = 1
     y_ = ndl.Tensor(y_one_hot)
-    return softmax_loss(h,y_).numpy(), np.mean(h.numpy().argmax(axis=1) != y)
+    return softmax_loss(h, y_).numpy(), np.mean(h.numpy().argmax(axis=1) != y)
