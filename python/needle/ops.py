@@ -103,7 +103,8 @@ class EWiseDiv(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        a, b = node.inputs
+        return out_grad / b, -1 * out_grad * a * (b**-2)
         ### END YOUR SOLUTION
 
 
@@ -123,7 +124,8 @@ class DivScalar(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+
+        return
         ### END YOUR SOLUTION
 
 
@@ -208,7 +210,15 @@ class Summation(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        ipt = node.inputs[0]
+        ret = out_grad*array_api.ones(ipt.shape)
+        return [ret]
+        # ret = []
+        # for ipt in node.inputs:
+        #     v = array_api.ones_like(ipt.cached_data)
+        #     ret.append(v * out_grad)
+        # return ret
+        # # raise NotImplementedError()
         ### END YOUR SOLUTION
 
 
