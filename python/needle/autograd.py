@@ -327,6 +327,8 @@ class Tensor(Value):
         return data.numpy()
 
     def __add__(self, other):
+        # t1, t2 = type(self), type(other)
+        # check = isinstance(other, Tensor)
         if isinstance(other, Tensor):
             return needle.ops.EWiseAdd()(self, other)
         else:
@@ -400,16 +402,17 @@ def compute_gradient_of_variables(output_tensor, out_grad):
 
     ### BEGIN YOUR SOLUTION
     for node in reverse_topo_order:
-
-        v_i = sum(node_to_output_grads_list[node])
+        adjoint = node_to_output_grads_list[node]
+        v_i = sum(adjoint)
         assert (node.shape == v_i.shape)
         node.grad = v_i
 
         if node.op is None:
             continue
         v_ki_list = node.op.gradient(v_i, node)
-        print(node.op)
+        # print(node.op)
         for ipt, v_ki in zip(node.inputs, v_ki_list):
+            # t = type(v_ki)
             node_to_output_grads_list.setdefault(ipt, list())
             node_to_output_grads_list[ipt].append(v_ki)
 

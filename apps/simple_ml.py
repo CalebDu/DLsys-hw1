@@ -1,11 +1,13 @@
+
 import struct
 import gzip
 import numpy as np
 
 import sys
-
-sys.path.append('python/')
+sys.path.append('./python')
 import needle as ndl
+from needle.ops import exp, log
+from needle.autograd import Tensor
 
 
 def parse_mnist(image_filesname, label_filename):
@@ -63,7 +65,9 @@ def softmax_loss(Z, y_one_hot):
         Average softmax loss over the sample. (ndl.Tensor[np.float32])
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    n = Z.shape[0] 
+    loss = log(exp(Z).sum(1)).sum() - (Z*y_one_hot).sum()
+    return loss / n
     ### END YOUR SOLUTION
 
 

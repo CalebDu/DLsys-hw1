@@ -2,7 +2,7 @@
 
 import enum
 from numbers import Number
-from typing import Optional, List
+from typing import Iterable, Optional, List
 from .autograd import NDArray
 from .autograd import Op, Tensor, Value, TensorOp
 from .autograd import TensorTuple, TensorTupleOp
@@ -236,8 +236,11 @@ class Summation(TensorOp):
         ipt = node.inputs[0]
         shape = list(out_grad.shape)
         if self.axes:
-            for axis in self.axes:
-                shape.insert(axis, 1)
+            if isinstance(self.axes, int):
+                shape.insert(self.axes, 1)
+            else:
+                for axis in self.axes:
+                    shape.insert(axis, 1)
 
         grad = broadcast_to(reshape(out_grad, shape), ipt.shape) * Tensor(
             array_api.ones(ipt.shape))
@@ -301,7 +304,8 @@ class Log(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        ipt = node.inputs[0]
+        return [out_grad / ipt]
         ### END YOUR SOLUTION
 
 
@@ -318,7 +322,12 @@ class Exp(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        ipt = node.inputs[0]
+        # t = type(Tensor)
+        # t = type(exp(ipt))
+        grad = out_grad * exp(ipt)
+        # t = type(grad)
+        return [grad]
         ### END YOUR SOLUTION
 
 
