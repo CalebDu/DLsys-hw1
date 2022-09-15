@@ -340,12 +340,18 @@ class ReLU(TensorOp):
 
     def compute(self, a):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+
+        mask = (a > 0)
+        ret = a * mask
+        return ret
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        ipt = node.inputs[0]
+        grad = Tensor(
+            (ipt.cached_data > 0).astype(array_api.float32)) * out_grad
+        return [grad]
         ### END YOUR SOLUTION
 
 
