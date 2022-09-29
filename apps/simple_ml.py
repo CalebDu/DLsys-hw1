@@ -103,7 +103,7 @@ def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
     n = X.shape[0]
     n_class = max(y) + 1
     for idx, bat in enumerate(range(0, n, batch)):
-        print(f"batch:{idx}")
+        # print(f"batch:{idx}")
         bat_x = X[bat:bat + batch, :]
         bat_y = y[bat:bat + batch]
 
@@ -114,8 +114,8 @@ def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
         z = ndl.matmul(ndl.relu(ndl.matmul(img, W1)), W2)
         loss = softmax_loss(z, label)
         loss.backward()
-        new_W1 = Tensor(W1.numpy() - lr*W1.grad.numpy())
-        new_W2 = Tensor(W2.numpy() - lr*W2.grad.numpy())
+        new_W1 = Tensor(W1.numpy() - lr * W1.grad.numpy())
+        new_W2 = Tensor(W2.numpy() - lr * W2.grad.numpy())
         W1, W2 = new_W1, new_W2
     return (W1, W2)
     ### END YOUR SOLUTION
